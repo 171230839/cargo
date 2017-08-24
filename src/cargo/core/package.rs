@@ -85,6 +85,7 @@ impl Package {
         Ok(pkg)
     }
 
+    pub fn cfgs(&self) -> Option<&HashMap<String, String>> { self.manifest.original().cfgs()}
     pub fn dependencies(&self) -> &[Dependency] { self.manifest.dependencies() }
     pub fn manifest(&self) -> &Manifest { &self.manifest }
     pub fn manifest_path(&self) -> &Path { &self.manifest_path }

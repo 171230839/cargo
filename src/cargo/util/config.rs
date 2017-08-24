@@ -79,9 +79,10 @@ impl Config {
 
     pub fn default() -> CargoResult<Config> {
         let shell = Shell::new();
-        let cwd = env::current_dir().chain_err(|| {
-            "couldn't get the current directory of the process"
-        })?;
+        // let cwd = env::current_dir().chain_err(|| {
+        //     "couldn't get the current directory of the process"
+        // })?;
+        let cwd = PathBuf::from("/Users/yaolei/Documents/Rust Projects/testcft");
         let homedir = homedir(&cwd).ok_or_else(|| {
             "Cargo couldn't find your home directory. \
              This probably means that $HOME was not set."

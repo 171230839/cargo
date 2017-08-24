@@ -107,6 +107,7 @@ pub fn execute(options: Options, config: &Config) -> CliResult {
     };
 
     let ws = Workspace::new(&root, config)?;
+
     match ops::run(&ws, &compile_opts, &options.arg_args)? {
         None => Ok(()),
         Some(err) => {
@@ -116,7 +117,7 @@ pub fn execute(options: Options, config: &Config) -> CliResult {
                 Some(exit) => exit,
                 None => return Err(
                     CliError::new(CargoErrorKind::ProcessErrorKind(err).into(), 101)),
-            };
+            }; 
 
             // If `-q` was passed then we suppress extra error information about
             // a failed process, we assume the process itself printed out enough

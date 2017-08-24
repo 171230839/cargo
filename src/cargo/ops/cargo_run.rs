@@ -49,6 +49,9 @@ pub fn run(ws: &Workspace,
                    multiple were specified")
         }
     }
+    
+    
+
 
     let compile = ops::compile(ws, options)?;
     assert_eq!(compile.binaries.len(), 1);

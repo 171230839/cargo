@@ -73,6 +73,7 @@ See 'cargo help <command>' for more information on a specific command.
 fn main() {
     env_logger::init().unwrap();
 
+       
     let config = match Config::default() {
         Ok(cfg) => cfg,
         Err(e) => {
@@ -81,14 +82,19 @@ fn main() {
         }
     };
 
+
+
+
     let result = (|| {
-        let args: Vec<_> = try!(env::args_os()
-            .map(|s| {
-                s.into_string().map_err(|s| {
-                    CargoError::from(format!("invalid unicode in argument: {:?}", s))
+        let args: Vec<_> = try!(
+            env::args_os()
+                .map(|s| {
+                    s.into_string().map_err(|s| {
+                        CargoError::from(format!("invalid unicode in argument: {:?}", s))
+                    })
                 })
-            })
-            .collect());
+                .collect()
+        );
         let rest = &args;
         cargo::call_main_without_stdin(execute, &config, USAGE, rest, true)
     })();
@@ -139,17 +145,19 @@ macro_rules! declare_mod {
 }
 each_subcommand!(declare_mod);
 
-/**
+ /**
   The top-level `cargo` command handles configuration and project location
   because they are fundamental (and intertwined). Other commands can rely
   on this top-level information.
 */
 fn execute(flags: Flags, config: &Config) -> CliResult {
-    config.configure(flags.flag_verbose,
-                   flags.flag_quiet,
-                   &flags.flag_color,
-                   flags.flag_frozen,
-                   flags.flag_locked)?;
+    config.configure(
+        flags.flag_verbose,
+        flags.flag_quiet,
+        &flags.flag_color,
+        flags.flag_frozen,
+        flags.flag_locked,
+    )?;
 
     init_git_transports(config);
     let _token = cargo::util::job::setup();
@@ -158,10 +166,12 @@ fn execute(flags: Flags, config: &Config) -> CliResult {
         let version = cargo::version();
         println!("{}", version);
         if flags.flag_verbose > 0 {
-            println!("release: {}.{}.{}",
-                     version.major,
-                     version.minor,
-                     version.patch);
+            println!(
+                "release: {}.{}.{}",
+                version.major,
+                version.minor,
+                version.patch
+            );
             if let Some(ref cfg) = version.cfg_info {
                 if let Some(ref ci) = cfg.commit_info {
                     println!("commit-hash: {}", ci.commit_hash);
@@ -204,7 +214,13 @@ fn execute(flags: Flags, config: &Config) -> CliResult {
 
         // For `cargo help foo`, print out the usage message for the specified
         // subcommand by executing the command with the `-h` flag.
-        "help" => vec!["cargo".to_string(), flags.arg_args[0].clone(), "-h".to_string()],
+        "help" => {
+            vec![
+                "cargo".to_string(),
+                flags.arg_args[0].clone(),
+                "-h".to_string(),
+            ]
+        }
 
         // For all other invocations, we're of the form `cargo foo args...`. We
         // use the exact environment arguments to preserve tokens like `--` for
@@ -269,7 +285,8 @@ fn aliased_command(config: &Config, command: &String) -> CargoResult<Option<Vec<
     match config.get_string(&alias_name) {
         Ok(value) => {
             if let Some(record) = value {
-                let alias_commands = record.val
+                let alias_commands = record
+                    .val
                     .split_whitespace()
                     .map(|s| s.to_string())
                     .collect();
@@ -279,10 +296,8 @@ fn aliased_command(config: &Config, command: &String) -> CargoResult<Option<Vec<
         Err(_) => {
             let value = config.get_list(&alias_name)?;
             if let Some(record) = value {
-                let alias_commands: Vec<String> = record.val
-                    .iter()
-                    .map(|s| s.0.to_string())
-                    .collect();
+                let alias_commands: Vec<String> =
+                    record.val.iter().map(|s| s.0.to_string()).collect();
                 result = Ok(Some(alias_commands));
             }
         }
@@ -311,15 +326,18 @@ fn execute_external_subcommand(config: &Config, cmd: &str, args: &[String]) -> C
     let command = match path {
         Some(command) => command,
         None => {
-            return Err(CargoError::from(match find_closest(config, cmd) {
+            return Err(
+                CargoError::from(match find_closest(config, cmd) {
                     Some(closest) => {
-                        format!("no such subcommand: `{}`\n\n\tDid you mean `{}`?\n",
-                                cmd,
-                                closest)
+                        format!(
+                            "no such subcommand: `{}`\n\n\tDid you mean `{}`?\n",
+                            cmd,
+                            closest
+                        )
                     }
                     None => format!("no such subcommand: `{}`", cmd),
-                })
-                .into())
+                }).into(),
+            )
         }
     };
 
@@ -377,12 +395,16 @@ fn list_commands(config: &Config) -> BTreeSet<String> {
 fn is_executable<P: AsRef<Path>>(path: P) -> bool {
     use std::os::unix::prelude::*;
     fs::metadata(path)
-        .map(|metadata| metadata.is_file() && metadata.permissions().mode() & 0o111 != 0)
+        .map(|metadata| {
+            metadata.is_file() && metadata.permissions().mode() & 0o111 != 0
+        })
         .unwrap_or(false)
 }
 #[cfg(windows)]
 fn is_executable<P: AsRef<Path>>(path: P) -> bool {
-    fs::metadata(path).map(|metadata| metadata.is_file()).unwrap_or(false)
+    fs::metadata(path)
+        .map(|metadata| metadata.is_file())
+        .unwrap_or(false)
 }
 
 fn search_directories(config: &Config) -> Vec<PathBuf> {

@@ -47,7 +47,7 @@ fn do_read_manifest(contents: &str,
             util::without_prefix(manifest_file, config.cwd()).unwrap_or(manifest_file);
         parse(contents, pretty_filename, config)?
     };
-
+  
     let mut unused = BTreeSet::new();
     let manifest: TomlManifest = serde_ignored::deserialize(toml, |path| {
         let mut key = String::new();
@@ -222,6 +222,7 @@ pub struct TomlManifest {
     patch: Option<HashMap<String, HashMap<String, TomlDependency>>>,
     workspace: Option<TomlWorkspace>,
     badges: Option<HashMap<String, HashMap<String, String>>>,
+    cfgs: Option<HashMap<String, String>>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default)]
@@ -468,6 +469,7 @@ impl TomlManifest {
             patch: None,
             workspace: None,
             badges: self.badges.clone(),
+            cfgs: self.cfgs.clone(),
         };
 
         fn map_deps(deps: Option<&HashMap<String, TomlDependency>>)
@@ -612,6 +614,8 @@ impl TomlManifest {
 
         let summary = Summary::new(pkgid, deps, me.features.clone()
             .unwrap_or_else(HashMap::new))?;
+        // let summary = summary.with_cfgs(me.cfgs.clone().unwrap_or_else(HashMap::new));
+            
         let metadata = ManifestMetadata {
             description: project.description.clone(),
             homepage: project.homepage.clone(),
@@ -668,6 +672,10 @@ impl TomlManifest {
         }
 
         Ok((manifest, nested_paths))
+    }
+
+    pub fn cfgs(&self) -> Option<&HashMap<String, String>>{
+        self.cfgs.as_ref()
     }
 
     fn to_virtual_manifest(me: &Rc<TomlManifest>,

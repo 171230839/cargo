@@ -309,6 +309,7 @@ pub fn compile_ws<'a>(ws: &Workspace<'a>,
             build_config.doc_all = deps;
         }
 
+        //println!("", ws.current_manifest.inner)
         ops::compile_targets(ws,
                              &package_targets,
                              &packages,

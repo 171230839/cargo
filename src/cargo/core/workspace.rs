@@ -54,6 +54,8 @@ pub struct Workspace<'cfg> {
     // not needed; false if this workspace should only enforce dependencies
     // needed by the current configuration (such as in cargo install).
     require_optional_deps: bool,
+
+    cfgs: HashMap<String, String>,
 }
 
 // Separate structure for tracking loaded packages (to avoid loading anything
@@ -115,6 +117,7 @@ impl<'cfg> Workspace<'cfg> {
             members: Vec::new(),
             is_ephemeral: false,
             require_optional_deps: true,
+            cfgs: HashMap::new(),
         };
         ws.root_manifest = ws.find_root(manifest_path)?;
         ws.find_members()?;
@@ -147,6 +150,7 @@ impl<'cfg> Workspace<'cfg> {
             members: Vec::new(),
             is_ephemeral: true,
             require_optional_deps: require_optional_deps,
+            cfgs: HashMap::new(),
         };
         {
             let key = ws.current_manifest.parent().unwrap();
@@ -284,6 +288,22 @@ impl<'cfg> Workspace<'cfg> {
 
         {
             let current = self.packages.load(&manifest_path)?;
+            // match *current.cfgs(){
+                
+            //     Some(f) => self.cfgs = f.clone(),
+            //     None => {}
+                 
+            // }
+            match current{
+                &MaybePackage::Package(ref p) => {
+                    match p.cfgs(){
+                        Some(map) => self.cfgs = map.clone(),
+                        None => {},
+                    }
+                }
+                &MaybePackage::Virtual(_) => {},
+            }
+         
             match *current.workspace_config() {
                 WorkspaceConfig::Root { .. } => {
                     debug!("find_root - is root {}", manifest_path.display());
@@ -570,6 +590,10 @@ impl<'cfg> Workspace<'cfg> {
 
         Ok(())
     }
+
+    pub fn cfgs(&self) -> &HashMap<String, String>{
+        &self.cfgs
+    }
 }
 
 fn expand_member_path(path: &Path) -> CargoResult<Vec<PathBuf>> {
@@ -665,4 +689,6 @@ impl MaybePackage {
             MaybePackage::Package(ref v) => v.manifest().workspace_config(),
         }
     }
+
+
 }

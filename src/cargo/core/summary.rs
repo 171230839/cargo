@@ -22,12 +22,14 @@ struct Inner {
     dependencies: Vec<Dependency>,
     features: HashMap<String, Vec<String>>,
     checksum: Option<String>,
+    // cfgs: HashMap<String, String>,
 }
 
 impl Summary {
     pub fn new(pkg_id: PackageId,
                dependencies: Vec<Dependency>,
-               features: HashMap<String, Vec<String>>) -> CargoResult<Summary> {
+               features: HashMap<String, Vec<String>>,
+               ) -> CargoResult<Summary> {
         for dep in dependencies.iter() {
             if features.get(dep.name()).is_some() {
                 bail!("Features and dependencies cannot have the \
@@ -69,9 +71,14 @@ impl Summary {
                 dependencies: dependencies,
                 features: features,
                 checksum: None,
+                // cfgs: HashMap::new(),
             }),
         })
     }
+    // pub fn with_cfgs(mut self, cfgs: HashMap<String, String>) -> Summary{
+    //     Rc::make_mut(&mut self.inner).cfgs = cfgs;
+    //     self
+    // }
 
     pub fn package_id(&self) -> &PackageId { &self.inner.package_id }
     pub fn name(&self) -> &str { self.package_id().name() }
@@ -79,6 +86,7 @@ impl Summary {
     pub fn source_id(&self) -> &SourceId { self.package_id().source_id() }
     pub fn dependencies(&self) -> &[Dependency] { &self.inner.dependencies }
     pub fn features(&self) -> &HashMap<String, Vec<String>> { &self.inner.features }
+    // pub fn cfgs(&self) -> &HashMap<String, String> {&self.inner.cfgs }
     pub fn checksum(&self) -> Option<&str> {
         self.inner.checksum.as_ref().map(|s| &s[..])
     }
