@@ -114,4 +114,16 @@ which can be obtained from the [upstream repository][1].
 [1]: https://github.com/libgit2/libgit2
 
 
-I add a little fan foundation.
+I add a little fan foundation. 
+
+In the Cargo.toml. write cfgs  like this
+[cfgs]
+tt = "tt"
+
+will be work in main.rs. like features will give rustc the parameters  "--cfg tt="tt"" . and all dependences will have this cfg attributes. It's use like c++ marcos.
+
+#[cfg(tt = "tt")]
+fn printtt() {
+    println!("cfg tt=tt");
+}
+
