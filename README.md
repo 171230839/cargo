@@ -1,4 +1,4 @@
-This is a cargo fork. I only modifiy a little to add a function to let cargo can custom translate more attributes （cfgs) to rustc.   
+This is a cargo fork.  https://github.com/rust-lang/cargo 。I only modifiy a little to add a function to let cargo can custom translate more attributes （cfgs) to rustc.   
 
 In the Cargo.toml. write cfgs  like this
 [cfgs]
